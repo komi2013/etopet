@@ -1,0 +1,5 @@
+<div>
+<img border="1" src="/public/img/level/1.jpg" width="300" height="300">
+</div>
+<h2>LEVEL UP</h2>
+<a href=""><?=__('My Page');?></a>

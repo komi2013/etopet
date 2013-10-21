@@ -1,0 +1,17 @@
+please confirm it
+welcome to this web site
+
+OK
+this is url 
+
+%URL%
+
+test desu
+
+%U_ID%
+
+U_id desu
+
+%NOTHING%
+
+mouikkai

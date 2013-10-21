@@ -1,0 +1,67 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_In_Resquiz extends Controller_Template {
+	public function action_index()
+	{
+    $this->lang = $this->request->param('lang');
+		$domain = new Model_Domain;
+		$api = new Model_Api;
+    $api->receive_data = $this->request->param('one');
+    $api->salt_key = $domain->quiz_key;
+		$raw_data = $api->receive();
+    if (!$raw_data['pv_u_id']) die("$('#no_login').css('display','block')");
+//     echo Debug::vars($raw_data);
+    error_reporting(E_ALL & E_NOTICE);
+    $res_quiz = ORM::factory('resQuiz')->where('pv_u_id', '=', $raw_data['pv_u_id'])->where('enqu_id', '=', $raw_data['enqu_id'])->where('condition', '=', $raw_data['condition'])->find();
+
+    if ($res_quiz->loaded() AND $raw_data['condition'] == 1)
+    {
+      $msg = __('you already got food'); 
+    }
+    elseif (!$res_quiz->loaded() AND $raw_data['condition'] == 1)
+    {
+      
+      $res_quiz->pv_u_id = $raw_data['pv_u_id'];
+      $res_quiz->enqu_id = $raw_data['enqu_id'];
+      $res_quiz->condition = $raw_data['condition'];
+      $res_quiz->save();
+      $msg = __('you got food');
+    }
+    elseif ($res_quiz->loaded() AND $raw_data['condition'] == 2)
+    {
+      $msg = __('quiz maker already got food');
+    }
+    elseif (!$res_quiz->loaded() AND $raw_data['condition'] == 2)
+    {
+      $res_quiz->pv_u_id = $raw_data['pv_u_id'];
+      $res_quiz->enqu_id = $raw_data['enqu_id'];
+      $res_quiz->condition = $raw_data['condition'];
+      $res_quiz->maker = $raw_data['maker'];
+      $res_quiz->save();
+      $msg = __('good question! quiz maker got food');
+    }
+    elseif ($raw_data['condition'] == 3)
+    {
+      $msg = __('no food');
+    }
+    
+    $res_quiz = ORM::factory('resQuiz')->where('enqu_id', '=', $raw_data['enqu_id'])->find_all();
+
+    $status = ORM::factory('status');
+    $status->or_where_open();
+    foreach ($res_quiz as $k => $d)
+    {
+      $status->or_where('pv_u_id', '=', $d->pv_u_id);  
+    }
+    $status->or_where_close();
+    if (isset($k))
+    {
+      $status = $status->order_by('level','DESC')->order_by('exp','DESC')->order_by('food','DESC')->limit('5')->find_all();
+    }
+    $this->template = View::factory('third/res_quiz');
+    
+    $this->template->status = $status;
+    $this->template->msg = $msg;
+
+	}
+}
+//end

@@ -1,0 +1,27 @@
+<?php defined('SYSPATH') or die('No direct access allowed.');
+class Model_ResQuiz extends ORM {
+  protected $_table_name = 'res_quiz';
+  public function save()
+  {
+    parent::save();
+    if ($this->saved())
+    {
+      $status = ORM::factory('status')->where('pv_u_id', '=', $this->pv_u_id)->find();
+      $status->food = $status->food + 1;
+      if ($this->condition == 1)
+      {
+        $status->pv_u_id = $this->pv_u_id;
+      }
+      elseif ($this->condition == 2)
+      {
+//         $status = ORM::factory('status')->where('pv_u_id', '=', $this->pv_u_id)->find();
+//         $status->food = $status->food + 1;
+        $status->pv_u_id = $this->maker; 
+      }
+      $status->save();
+//     echo View::factory('profiler/stats');
+ 
+    }
+  }
+
+}

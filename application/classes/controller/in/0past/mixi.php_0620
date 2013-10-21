@@ -1,0 +1,85 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_In_Mixi extends Controller {
+	public function action_index()
+  {
+  	$this->lang = $this->request->param('lang');
+    $func = $this->request->param('one');
+    $this->$func();
+  }
+  public function login()
+  {
+    
+    $url = 'https://secure.mixi-platform.com/2/token';
+    echo Debug::vars($_GET);
+    $request = Request::factory($url)
+        ->method('POST')
+        ->post('grant_type', 'authorization_code')
+        ->post('client_id', 'mixiapp-web_39856')
+        ->post('client_secret', '065351f9748ad73de2bf3310e7f59855152f3310')
+        ->post('code', $_GET['code'])
+        ->post('redirect_uri', 'https://mixi-etopet-stg.komahana.info/ja/in/mixi/login/')
+        ;
+    
+    
+    $response = $request->execute();
+    
+    $data = $response->body();
+    
+    $data = json_decode($data);
+    
+    echo Debug::vars($data);
+    
+    $contents =file_get_contents('https://api.mixi-platform.com/2/people/@me/@self?access_token='.$data->access_token);
+
+    $contents = json_decode($contents);
+    
+    echo Debug::vars($contents);
+
+    $session = Session::instance();
+    $session->set('pv_u_id',$contents->entry->id);
+    Cookie::set('name', $contents->entry->displayName);
+    Cookie::set('img', $contents->entry->thumbnailUrl);
+
+    $usr = ORM::factory('usr')->where('pv_u_id', '=', $contents->entry->id)->find();
+
+    if ($usr->loaded())
+    {
+      $session->set('u_id',$usr->id);
+      $usr->name = $contents->entry->displayName;
+      $usr->img = $contents->entry->thumbnailUrl;
+      $usr->date = date("Y-m-d", time());
+      $usr->save();
+      $this->request->redirect('/ja/main/ ');
+    }
+    else
+    {
+      $u_id = ORM::factory('usr')->getnextval();
+      $usr->pv_u_id = $contents->entry->id;
+      $usr->stage = 1;
+      $usr->name = $contents->entry->displayName;
+      $usr->img = $contents->entry->thumbnailUrl;
+      $usr->id = $u_id;
+      $usr->save();
+      $u_id = ORM::factory('usr')->getnextval();
+      
+      $status = ORM::factory('status');
+      $status->level = 1;
+      $status->food = 10;
+      $status->manpuku = 0;
+      $status->u_id = $u_id;
+      $status->save();
+
+      $session->set('u_id',$u_id);
+
+      $this->request->redirect('/ja/main/start/ ');
+    }
+  }
+  public function logout()
+  {
+    Session::instance()->destroy();
+    $domain = new Model_Domain;    
+ 	  $this->request->redirect($domain->users.'/ja/in/users/logout/');
+  }
+
+}
+//end

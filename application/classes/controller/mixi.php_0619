@@ -1,0 +1,17 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_Mixi extends Controller_All {
+
+	public function action_index()
+	{
+    $func = $this->request->param('one');
+    $this->$func();
+	}
+  public function login()
+	{
+    parent::all();
+    $this->page_title = __('ETO pet');
+    $this->template->content = View::factory('mixi/login');
+	}
+
+}
+//end

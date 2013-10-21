@@ -1,0 +1,50 @@
+<div>
+
+<a href="../">back</a>
+
+birth!!
+
+</div>
+
+<script type="text/javascript">
+
+enchant();
+
+var PET_IMAGE = "/public/img/snake.jpg";
+window.onload = function() {
+  var game = new Game();
+  game.preload(PET_IMAGE);
+  game.fps = 2;  
+  game.onload = function() {
+  var pet = new Sprite(300, 300);
+    pet.image = game.assets[PET_IMAGE];
+    pet.x = 0; 
+    pet.y = 0;
+    game.rootScene.addChild(pet);
+    var frameList = [0,1,2,3,4,5,6];
+    var frame_i = 0;
+    pet.frameIndex = 0;
+    pet.onenterframe = function() {
+      if (frame_i < 6) {
+        this.frameIndex += 1;
+        this.frameIndex %= frameList.length;
+        this.frame = frameList[this.frameIndex];
+        ++frame_i;
+      }
+      else
+      {
+        window.location.replace('../')
+      }
+  	};
+  };
+  game.start();
+};
+
+</script>
+
+<style type="text/css">
+span  {color: red}
+--a {align:right}
+.title{box-shadow: 1px 1px 5px #aaa;}
+.graph{background-color: #99cc00;}
+</style>

@@ -1,0 +1,25 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_Node extends Controller_All {
+
+	public function action_index()
+	{
+//     parent::all();
+    $slash = substr($_SERVER["REQUEST_URI"], -1);
+    if ($slash != "/") $this->request->redirect($_SERVER["REQUEST_URI"]."/ ");
+    $this->session = Session::instance();
+//  	  $this->pv_u_id = $this->session->get('pv_u_id');
+    $this->lang = $this->request->param('lang');
+    $this->template = View::factory('stg2/node');
+    View::bind_global('page_title', $this->page_title);
+    $this->page_title = 'node';
+    echo 'test?<br>';
+    echo hash_hmac('sha256', 'komatsu', 'key');
+//     $api = new Model_Api;
+//     $api
+//     $this->template->content = View::factory('stg2/active');
+//     $this->template->content->lang = $this->lang;
+	}
+
+
+}
+//end

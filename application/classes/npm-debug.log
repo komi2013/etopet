@@ -1,0 +1,23 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/home/developer1/nvm/v0.8.9/bin/node',
+1 verbose cli   '/home/developer1/nvm/v0.8.9/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '-d' ]
+2 info using npm@1.1.61
+3 info using node@v0.8.9
+4 verbose read json /prd/etopet/application/classes/package.json
+5 error install Couldn't read dependencies
+6 error Error: ENOENT, open '/prd/etopet/application/classes/package.json'
+7 error If you need help, you may report this log at:
+7 error     <http://github.com/isaacs/npm/issues>
+7 error or email it to:
+7 error     <npm-@googlegroups.com>
+8 error System Linux 2.6.32-279.14.1.el6.x86_64
+9 error command "/home/developer1/nvm/v0.8.9/bin/node" "/home/developer1/nvm/v0.8.9/bin/npm" "install" "-d"
+10 error cwd /prd/etopet/application/classes
+11 error node -v v0.8.9
+12 error npm -v 1.1.61
+13 error path /prd/etopet/application/classes/package.json
+14 error code ENOENT
+15 error errno 34
+16 verbose exit [ 34, true ]

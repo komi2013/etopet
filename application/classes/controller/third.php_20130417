@@ -1,0 +1,13 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_Third extends Controller_All {
+
+	public function action_index()
+	{
+    parent::all();
+    $this->page_title = __('ETO pet');
+    $this->template->content = View::factory('eto/home/'.$this->lang);
+//     $this->template->content->lang = $this->lang;
+	}
+
+}
+//end

@@ -1,0 +1,21 @@
+<?php
+$lang = Request::current()->param('lang');
+$one = Request::current()->param('one');
+$two = Request::current()->param('two');
+i18n::lang($lang);
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title><?=__($page_title);?></title>
+<meta name="Description" content="" />
+<meta name="Keywords"  content="" />
+
+<link rel="stylesheet" type="text/css" media="screen,print" href="/public/game/stg2/style.css" />
+</head>
+<body>
+<?=$content;?>
+</body>
+</html>

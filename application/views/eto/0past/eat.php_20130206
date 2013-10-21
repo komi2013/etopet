@@ -1,0 +1,42 @@
+<div class="body">
+
+<a></a>
+
+die!!
+
+</div>
+
+<script type="text/javascript">
+
+enchant();
+
+window.onload = function() {
+    var game = new Game(320, 320);
+    game.preload('/public/img/bear.gif');
+    game.onload = function() {
+        var bear = new Sprite(20, 30);
+        bear.image = game.assets['/public/img/bear.gif'];
+        bear.animeWaitMax = 3;        // アニメーションのWait値
+        bear.animeWaitCount = 0;    // アニメーションのWait値のカウント
+        bear.addEventListener('enterframe', function() {
+            this.x += 3;
+            if (this.animeWaitCount >= this.animeWaitMax) {
+                this.animeWaitCount = 0;
+                this.frame++;
+            } else {
+                this.animeWaitCount++;
+            }
+        });
+        game.rootScene.addChild(bear);
+    };
+    game.start();
+};
+
+</script>
+
+<style type="text/css">
+span  {color: red}
+a {align:right}
+.title{box-shadow: 1px 1px 5px #aaa;}
+.graph{background-color: #99cc00;}
+</style>

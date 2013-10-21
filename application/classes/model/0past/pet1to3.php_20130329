@@ -1,0 +1,7 @@
+<?php defined('SYSPATH') or die('No direct access allowed.');
+
+class Model_Pet1to3 extends ORM {
+
+protected $_table_name = 'pet1_3';
+
+}

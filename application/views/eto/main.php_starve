@@ -1,0 +1,74 @@
+<br>
+<div>
+
+<div>
+  <img border="1" src="<?=$mt_level->img;?>" width="300" height="300">
+</div>
+<div>
+  <a href="/<?=$lang;?>/main/eat"><?=__('eat');?></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="/<?=$lang;?>/main/play"><?=__('play');?></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="/<?=$lang;?>/main/fight"><?=__('fight');?></a>&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+<br>
+<div>
+  <a><?=__('level');?> <?=$status->level;?></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a><?=__('food');?></a> <a><?=$status->food;?></a>
+</div>
+<br>
+
+<?php if($ch_lv == 'up'){ ?>
+  <img border="1" src="/public/img/lvup.gif">
+<?php }elseif($ch_lv == 'down'){ ?>
+  <h2>LEVEL DOWN</h2>
+<?php } ?>
+
+<a><?=__('experience');?></a>
+<div class="outline">
+  <button class="exp" style="width:<?=$status->exp / $mt_level->goal_exp * 300;?>px;"><?=$status->exp;?></button>
+</div>
+<br>
+<a><?=__('energy');?></a>
+<div class="outline">
+  <button class="mpk" style="width:<?=$status->manpuku / $mt_level->max_mpk * 300;?>px;"><?=$status->manpuku;?></button>
+</div>
+
+<span class="warn"><?=ceil($status->manpuku / $mt_level->rate_hgry);?> <?=__('days later, pet will be starved');?></span><br>
+
+<?php if($goto_quiz){ ?>
+<a href="<?=$goto_quiz;?>"><?=__('make quiz to get food');?></a>
+<?php } ?>
+</div>
+<br>
+<script type="text/javascript">
+var err_msg = '<?=$err_msg;?>';
+if(err_msg){
+  alert(err_msg);
+}
+
+</script>
+
+<style type="text/css">
+.warn{
+ color: red;
+}
+a{
+ align: right;
+}
+.title{
+ box-shadow: 1px 1px 5px #aaa;
+}
+.outline .exp{
+ background-color: #A4B1E5;
+}
+
+.outline .mpk{
+ background-color: #C6B329;
+}
+
+.outline{
+ width: 300px;
+ border: 2px solid;
+ border-color: black;
+-- background-color: #99cc00;
+}
+</style>

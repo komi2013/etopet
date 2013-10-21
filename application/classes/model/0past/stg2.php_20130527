@@ -1,0 +1,162 @@
+<?php defined('SYSPATH') or die('No direct access allowed.');
+
+class Model_Stg2 extends Model_Stg1 {
+
+  public function main()
+  {
+  	View::bind_global('page_title', $this->page_title);
+
+    $this->template = View::factory('stg2/template');
+    $this->session = Session::instance();
+ 	  $this->pv_u_id = $this->session->get('pv_u_id');
+    $this->status = ORM::factory('status')->where('pet_id', '=', $this->pet->id)->find();
+    $this->mt_level_1 = ORM::factory('mtLevelOne')->where('id', '=', $this->pet->level)->find();
+    $this->today = date("Y-m-d", time());
+    $this->uni_today = strtotime('today');
+    $this->uni_date = strtotime($this->status->date);
+    
+    $this->status->manpuku = $this->status->manpuku - (($this->uni_today - $this->uni_date) / 86400 );
+    if ($this->status->manpuku <= 0)
+    {
+      parent::lv_down();
+    }
+    elseif ($this->status->exp >= $this->mt_level_1->goal_exp)
+    {
+      parent::lv_up();
+    }
+    elseif ($this->one == 'eat')
+    {
+      parent::eating();
+    }
+    elseif ($this->one == 'play')
+    {
+      $this->play();
+    }
+    else
+    {
+      $this->page_title = 'ETO pet';
+      $this->template->content = View::factory('stg2/main');    
+      $this->template->content->status = $this->status;
+      $this->template->content->pet = $this->pet;
+      $this->template->content->mt_level = $this->mt_level_1;
+
+      $domain = new Model_Domain;
+      $arr_pet['pv_u_id'] = $this->session->get('pv_u_id'); 
+      $arr_pet['name'] = Cookie::get('name'); 
+      $arr_pet['img'] = Cookie::get('img'); 
+      $arr_pet['lang'] = $this->lang; 
+      $json_data = json_encode($arr_pet);
+  		$ecrypt =  new Encrypt($domain->quiz_key, MCRYPT_MODE_NOFB, MCRYPT_RIJNDAEL_128);
+  		$encry_data = $ecrypt->encode($json_data);
+  		$url_safe_base64 = strtr( $encry_data, "+/", "-_" );
+
+      $this->template->content->goto_quiz = $domain->quiz.$this->lang.'/in/usrpet/login/?data='.$url_safe_base64;
+      
+    }
+//     $this->template->content->lang = $this->lang;
+      
+  }
+
+  public function resquiz()
+  {
+    $res_quiz = ORM::factory('resQuiz')->where('pv_u_id', '=', $this->raw_data['pv_u_id'])->where('enqu_id', '=', $this->raw_data['enqu_id'])->where('condition', '=', $this->raw_data['condition'])->find();
+
+    if (!$this->pet->loaded())
+    {
+      if ($this->raw_data['condition'] == 1) $msg = 'you got food';   
+      if ($this->raw_data['condition'] == 2) $msg = 'good question! quiz maker got food';   
+    }
+    elseif ($res_quiz->loaded() AND $this->raw_data['condition'] == 1)
+    {
+      $msg = 'you already got food'; 
+    }
+    elseif (!$res_quiz->loaded() AND $this->raw_data['condition'] == 1)
+    {
+      
+      $res_quiz->pv_u_id = $this->raw_data['pv_u_id'];
+      $res_quiz->enqu_id = $this->raw_data['enqu_id'];
+      $res_quiz->condition = $this->raw_data['condition'];
+      $res_quiz->save();
+
+      $this->status = ORM::factory('status')->where('pet_id', '=', $this->pet->id)->find();
+      $this->status->food = $this->status->food + 3;
+      $this->status->pv_u_id = $this->raw_data['pv_u_id'];
+      $this->status->img = $this->raw_data['img'];
+      $this->status->name = $this->raw_data['name'];
+      $this->status->save();
+
+      $msg = 'you got food';
+    }
+    elseif ($res_quiz->loaded() AND $this->raw_data['condition'] == 2)
+    {
+      $msg = 'quiz maker already got food';
+    }
+    elseif (!$res_quiz->loaded() AND $this->raw_data['condition'] == 2)
+    {
+      $res_quiz->pv_u_id = $this->raw_data['pv_u_id'];
+      $res_quiz->enqu_id = $this->raw_data['enqu_id'];
+      $res_quiz->condition = $this->raw_data['condition'];
+      $res_quiz->save();
+
+      $this->status = ORM::factory('status')->where('pet_id', '=', $this->pet->id)->find();
+      $this->status->food = $this->status->food + 1;
+      $this->status->pv_u_id = $this->raw_data['maker']; 
+      $this->status->img = $this->raw_data['img'];
+      $this->status->name = $this->raw_data['name'];
+      $this->status->save();
+
+      $msg = 'good question! quiz maker got food';
+    }
+    elseif ($this->raw_data['condition'] == 3)
+    {
+      $msg = 'no food';
+    }
+    
+    $res_quiz = ORM::factory('resQuiz')->where('enqu_id', '=', $this->raw_data['enqu_id'])->find_all();
+
+    $this->status = ORM::factory('status');
+    $arr_status = array();
+    $arr_lv = array();
+    foreach ($res_quiz as $k => $d)
+    { ++$k;
+      $usr = ORM::factory('usr')->where('pv_u_id', '=', $d->pv_u_id)->find();
+      $pet = ORM::factory('pet')->where('id', '=', $usr->pet_id)->find();
+      $arr_status[$k]['name'] = $usr->name;
+      $arr_lv[$k] = $pet->level;
+    }
+    arsort($arr_lv);
+    foreach ($arr_lv as $kk => $dd)
+    { ++$kk;
+      if ($kk < 6) $arr_status[$kk]['level'] = $dd[$kk];
+    }
+    if ($pet->loaded())
+    {
+      $pet = $pet->order_by('level','DESC')->limit('5')->find_all();
+    }
+
+    $this->template = View::factory('third/res_quiz');
+    
+    $this->template->status = $this->status;
+    $this->template->msg = $msg;
+
+  }
+  public function play()
+  {
+    $this->page_title = 'game';
+    $this->template = View::factory('stg2/game');
+//     $this->status->date = $this->today;
+//     if ($this->status->active > 0)
+//     {
+// 	    $this->template->content = View::factory('stg2/play');
+//       $this->template->content->limit_time = $this->status->active;    
+//     }
+//     else
+//     {
+//       $this->template->content = View::factory('stg2/no_play');
+//       $this->template->content->reason = 'no active point';
+//     }
+//     $this->template->content->status = $this->status;
+//     $this->template->content->mt_level = $this->mt_level_1;
+  }
+
+}

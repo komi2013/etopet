@@ -1,0 +1,60 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_In_Usr extends Controller {
+	public function action_index()
+  {
+  	$this->lang = $this->request->param('lang');
+    $func = $this->request->param('one');
+    $this->$func();
+  }
+  public function login()
+  {
+		$domain = new Model_Domain;
+		$api = new Model_Api;
+// 		$api->receive_data = $this->request->param('two');
+		$api->receive_data = $_GET['data'];
+    $api->salt_key = $domain->users_key;
+		$raw_data = $api->receive();
+//     echo Debug::vars($raw_data);
+    Session::instance()->set('pv_u_id',$raw_data['pv_u_id']);
+
+    $usr = ORM::factory('usr')->where('pv_u_id', '=', $raw_data['pv_u_id'])->find();
+    Cookie::set('name', $raw_data['name']);
+    Cookie::set('img', $raw_data['img']);
+    
+    if ($usr->loaded())
+    {
+      $this->request->redirect('/'.$raw_data['lang'].'/main/ ');
+    }
+    else
+    {
+      $pet_id = ORM::factory('pet')->getnextval();
+      $pet = ORM::factory('pet');
+      $pet->level = 1;
+      $pet->id = $pet_id;
+      $pet->save();
+      
+      $usr->pv_u_id = $raw_data['pv_u_id'];
+      $usr->pet_id = $pet_id;
+      $usr->name = $raw_data['name'];
+      $usr->pet_id = $raw_data['img'];
+      $usr->date = date("Ymd", time());
+      $usr->save();
+      
+      $pet1_3 = ORM::factory('pet1to3');
+      $pet1_3->pet_id = $pet_id;
+      $pet1_3->manpuku = 1;
+      $pet1_3->manpuku = 1;      
+      
+      $this->request->redirect('/'.$raw_data['lang'].'/main/start/ ');
+
+    }
+  }
+  public function logout()
+  {
+    Session::instance()->destroy();
+    $domain = new Model_Domain;    
+ 	  $this->request->redirect($domain->users.'/en/in/users/logout/');
+  }
+
+}
+//end

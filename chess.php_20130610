@@ -1,0 +1,85 @@
+<html>
+<head><title>chess</title></head>
+<body>
+
+<?php
+
+$n = 3;
+
+$place = array();
+
+while($n > 0){
+  $m = 3;
+  while($m > 0){
+    
+//     echo $n.','.$m.'<br>';
+    $place[] = array($n,$m);
+    
+    --$m;
+  }  
+  --$n;  
+}
+$cnt1 = 0;
+$cnt = 0;
+$dis_x = 0;
+$dis_y = 0;
+// $line = array(0,0,0,0);
+$newline = false;
+foreach($place as $d){
+  ++$cnt1;
+  $d[] = $d;
+  check_line($place,$d,$cnt1);
+  
+}
+
+function check_line($place,$d,$cnt1){
+
+    foreach($d as $arr){
+//       echo 'test';
+//       echo $arr[0];
+//       echo '<pre>';
+//       var_dump($arr);
+//       echo '</pre>'; 
+      $x = $arr[0];
+      $y = $arr[1]; 
+
+      }
+ 
+      foreach($place as $dd){
+    
+        
+        $dis_x = $x - $dd[0];
+        $dis_y = $y - $dd[1];
+    //     echo $dis_x.'<br>';
+        if($dis_x == 0 OR $dis_y == 0){
+        
+        }else if($dis_x == $dis_y OR $dis_x == -$dis_y){
+    
+    //     }else if($dis_x == $dis_y OR $dis_x == -$dis_y){
+        
+        }else{
+    //       $line[$cnt1][] = array($d[0],$d[1]);
+    //       $line[$cnt1][] = array($dd[0],$dd[1]);
+//           $dd[] = $d[0],$d[1];
+//           $dd[] = $dd[0],$dd[1];
+          ++$cnt;
+//           check_line($place,$dd,$cnt);
+          echo 'cnt<br>';
+        }
+      
+    
+
+    }
+
+}
+echo $cnt;
+
+?>
+
+<form method="GET" action="">
+  <input type="submit" value="send">
+<textarea name="input"></textarea>
+</form>
+
+</body>
+</html>

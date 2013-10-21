@@ -1,0 +1,105 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.');
+class Controller_Main extends Controller_Template {
+	public function action_index()
+  {
+    $slash = substr($_SERVER["REQUEST_URI"], -1);
+    if ($slash != "/") $this->request->redirect($_SERVER["REQUEST_URI"]."/ ");
+    $this->session = Session::instance();
+ 	  $this->pv_u_id = $this->session->get('pv_u_id');
+    $this->lang = $this->request->param('lang');
+// 		if (!$this->pv_u_id) die('you must login');
+		if (!$this->pv_u_id) $this->request->redirect('/'.$this->lang.'/home/ ');
+    
+  	View::bind_global('page_title', $this->page_title);
+    $this->template = View::factory('eto/template');
+    $status = ORM::factory('status')->where('pv_u_id', '=', $this->pv_u_id)->find();
+//     if (!$status->loaded()) $this->request->redirect('/'.$this->lang.'/main/start/ '); 
+    $mt_level = ORM::factory('mtLevel')->where('id', '=', $status->level)->find();
+    $today = date("Ymd", time());
+    $status->manpuku = $status->manpuku - (($today - $status->date) * $mt_level->rate_hgry);
+//     if ($this->request->param('one') == 'start')
+    if ($this->request->param('one') == 'start' AND $status->manpuku < 1)
+    {
+      $this->page_title = 'birth';
+      $this->template = View::factory('eto/game');
+	    $this->template->content = View::factory('eto/start');    
+      $this->template->content->status = $status;
+      $this->template->content->mt_level = $mt_level;
+      $status->date = $today;
+      $status->manpuku = 1;
+      $status->exp = 1;
+      $status->level = 1;
+      $status->date = $today;
+      $status->save();
+    }
+    elseif ($status->manpuku <= 0)
+    {
+  	  $this->page_title = 'die';
+      $this->template->content = View::factory('eto/die');    
+      $this->template->content->status = $status;
+      $this->template->content->mt_level = $mt_level;
+    }
+    elseif ($status->exp == $mt_level->goal_exp)
+    {
+	    $this->page_title = 'level up';
+      $this->template->content = View::factory('eto/level_up');    
+      $this->template->content->status = $status;
+      $this->template->content->mt_level = $mt_level;
+      ++$status->level;
+      $status->exp = $status->exp - $mt_level->goal_exp; 
+      $status->save();
+    }
+    elseif ($this->request->param('one') == 'eat')
+    {
+      $this->page_title = 'eating';
+      $this->template = View::factory('eto/game');
+      $status->date = $today;
+      if ($status->manpuku < $mt_level->max_mpk AND $status->food > 0)
+      {
+        while ($status->manpuku < $mt_level->max_mpk AND $status->food > 0)
+        {
+          ++$status->manpuku;
+          ++$status->exp;
+          $status->food = $status->food - $mt_level->rate_eat;
+        }
+  	    $this->template->content = View::factory('eto/eat');    
+        $status->save();
+      }
+      else
+      {
+        $this->template->content = View::factory('eto/no_eat');
+        if ($status->manpuku >= $mt_level->max_mpk) $this->template->content->reason = 'full stomach';
+        if ($status->food <= 0) $this->template->content->reason = 'no food';
+      }
+      $this->template->content->status = $status;
+      $this->template->content->mt_level = $mt_level;
+    }
+    else
+    {
+      $this->page_title = 'ETO pet';
+      $this->template->content = View::factory('eto/main');    
+      $this->template->content->status = $status;
+      $this->template->content->mt_level = $mt_level;
+
+      $domain = new Model_Domain;
+      $arr_pet['pv_u_id'] = $this->session->get('pv_u_id'); 
+      $arr_pet['name'] = Cookie::get('name'); 
+      $arr_pet['img'] = Cookie::get('img'); 
+      $arr_pet['lang'] = $this->lang; 
+      $json_data = json_encode($arr_pet);
+  		$ecrypt =  new Encrypt($domain->quiz_key, MCRYPT_MODE_NOFB, MCRYPT_RIJNDAEL_128);
+  		$encry_data = $ecrypt->encode($json_data);
+  		$url_safe_base64 = strtr( $encry_data, "+/", "-_" );
+
+      $this->template->content->goto_quiz = $domain->quiz.$this->lang.'/in/usrpet/';
+      
+    }
+    $this->template->content->lang = $this->lang;
+
+    $promo = ORM::factory('promo')->where('lang', '=', $this->lang)->find_all();
+    $this->template->pr_tpl = View::factory('/eto/pr_tpl');
+    $this->template->pr_tpl->promo = $promo;
+
+  }
+}
+//end

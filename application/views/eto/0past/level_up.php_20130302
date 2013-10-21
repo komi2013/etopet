@@ -1,0 +1,95 @@
+<div class="body">
+
+<a href="../">back</a>
+
+eat!!
+
+</div>
+
+<script type="text/javascript">
+
+enchant();
+
+var PET_IMAGE = "/public/img/kawashima.jpg";
+var FOOD_IMAGE = "/public/img/kawashima.jpg";
+var RATE_EAT = 1;
+var FOOD = 11;
+var LEVEL = 2;
+var MPK = 2;
+var MAX_MPK = 5;
+var ARR_FOOD = new Array();
+window.onload = function() {
+  var game = new Game();
+  game.preload(PET_IMAGE,FOOD_IMAGE);	// 画像読み込み
+  game.fps = 1;  
+  game.onload = function() {
+//     var scene = game.rootScene;
+  // 	scene.backgroundColor = "black";
+  	
+  	// スプライト生成
+    var pet = new Sprite(100, 120);		// flrame
+//     pet.moveTo(0, 50);				// place
+    pet.image = game.assets[PET_IMAGE];	// 画像をセット
+    pet.x = 0; 
+    pet.y = 0;
+    game.rootScene.addChild(pet);				// シーンに追加
+//     FOOD = new Array();
+    var food_amt = 0;
+    var yoko = 4;
+    var tate = (FOOD / yoko) + 1;
+    for(var y=0; y<tate; y++){
+    console.log(FOOD);
+      var x=0;
+      while(x<yoko && FOOD>0){
+        --FOOD;
+        ++x;
+        ++food_amt; // 敵の総数を示すカウンタを増やす
+        ARR_FOOD[food_amt] = new Sprite(16,16);
+        ARR_FOOD[food_amt].image = game.assets[FOOD_IMAGE];
+        ARR_FOOD[food_amt].x = x * 16; // X座標
+        ARR_FOOD[food_amt].y = y * 16 + 95; // Y座標
+        ARR_FOOD[food_amt]._style.zIndex = 2;  // Z座標
+        game.rootScene.addChild(ARR_FOOD[food_amt]);
+//       game.rootScene.addChild(enemy[count]);
+        console.log(FOOD);
+      }
+    }
+
+    // フレームアニメーションさせてみよう
+    var frameList = [0,1,2];
+    var click_i = 1;
+    pet.frameIndex = 0;
+    pet.onenterframe = function() {
+      // フレームを進める
+      if (food_amt > 0 || MAX_MPK > MPK) {
+//         pet.x += 1;
+        this.frameIndex += 1;
+        this.frameIndex %= frameList.length;
+        this.frame = frameList[this.frameIndex];
+//         ++click_i;
+        game.rootScene.removeChild(ARR_FOOD[food_amt]);
+        ++MPK;
+        --food_amt;
+      }
+  	};
+
+//     console.log(count);
+//     pet.addEventListener('touchstart', function() {
+//       click_i = 1;
+//         FOOD[1].removeFromScene();
+//       game.rootScene.removeChild(FOOD[count]);
+//       --count;  
+//     });
+
+  };
+  game.start();
+};
+
+</script>
+
+<style type="text/css">
+span  {color: red}
+--a {align:right}
+.title{box-shadow: 1px 1px 5px #aaa;}
+.graph{background-color: #99cc00;}
+</style>
